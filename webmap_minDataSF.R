@@ -13,7 +13,7 @@ source("datasf.R")
 
 # cultural.df <- load.dataset("5xmc-5bjj")
 streets_all <- load.dataset.geojson("3psu-pn9h")
-streets <- filter(streets_all,  `%in%` (classcode, seq(1,4)))
+streets <- filter(streets_all,  `%in%` (classcode, c(1,2,3,4)))
 
 mapview(streets)
 
@@ -35,4 +35,5 @@ server <- function(input, output, session) {  #errors line numbers start from he
 
 options(shiny.port = 7772)
 options(shiny.host = "0.0.0.0") #Replace with your server address  #use 0.0.0.0 for Shinyapps.io  
+
 shinyApp(ui, server)
