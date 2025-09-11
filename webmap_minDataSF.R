@@ -1,5 +1,6 @@
 # SO_question_addStarsImage14. saved as webmap_minDataSF.R
 
+library(rsconnect)
 library(sf)
 library(shiny)
 # library(leafem)
@@ -12,21 +13,35 @@ source("datasf.R")
 
 
 # cultural.df <- load.dataset("5xmc-5bjj")
-streets_all <- load.dataset.geojson("3psu-pn9h")
-streets <- filter(streets_all,  `%in%` (classcode, c(1,2,3,4)))
+# https://data.sfgov.org/-/Arterial-Streets-of-San-Francisco/3wks-ifmi/about_data
+streets <- load.dataset.geojson("3wks-ifmi")
+
+
+#Was using https://data.sfgov.org/Geographic-Locations-and-Boundaries/Streets-Active-and-Retired/3psu-pn9h/about_data
+#Active and Retired was too large for default shinyapps.io upload
+#Also caused intermittent error:  Error in data.matrix(data) 'list' object cannot be coerced to type 'double'
+# options(shiny.maxRequestSize = 25000000) #25,000,000 bytes > 18.2 Mb
+# > format(object.size(streets_all), units = "MB")
+# [1] "18.2 Mb"
+# streets <- filter(streets_all,  `%in%` (classcode, c(1,2,3,4)))
 
 mapview(streets)
 
 
 ui <- fluidPage(
   div(
-    h4("Streets from DataSF")
-    ),
+    h4("Arterial Streets from DataSF"),
+    uiOutput("tab")
+  ),
   leafletOutput("map", width = 600, height = 800)
 )
 
 server <- function(input, output, session) {  #errors line numbers start from here
   
+  url <- a("DataSF Arterial Streets View", href="https://data.sfgov.org/-/Arterial-Streets-of-San-Francisco/3wks-ifmi/about_data")
+  output$tab <- renderUI({
+    tagList("Source:", url)
+  })
   output$map <- renderLeaflet({
     m <- mapview(streets, legend = FALSE) #, native.crs = TRUE) #project = FALSE) #%>%
     m@map
