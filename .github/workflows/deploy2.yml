@@ -46,7 +46,7 @@ jobs:
             cran/terra@1.8-10
         env:
           # CRITICAL: Forces pak to explicitly record the full URL in its tracking database
-          CRAN: "https://cran.rstudio.com/"'
+          CRAN: "https://cran.rstudio.com/"
           
       - name: Authorize and Deploy Application
         env:
