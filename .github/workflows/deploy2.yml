@@ -33,6 +33,7 @@ jobs:
            any::leaflet
            any::mapview
            any::janitor
+           any::quarto
                         
       - name: Authorize and Deploy Application
         env:
