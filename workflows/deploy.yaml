@@ -45,6 +45,7 @@ jobs:
             rsconnect::deployApp(
               appDir = '.',
               appName = 'StreetsDataSF',
+              appMode = 'shiny',
               forceUpdate = TRUE
             )
           "
