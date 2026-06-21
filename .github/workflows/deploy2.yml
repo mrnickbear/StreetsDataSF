@@ -41,6 +41,8 @@ jobs:
           SHINYAPPS_ACCOUNT: ${{ secrets.SHINYAPPS_ACCOUNT }}
           SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
           SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
+          RSPM: ""
+          RENV_CONFIG_REPOS_OVERRIDE: ""
         run: |
           Rscript -e "
           options(repos = c(CRAN = 'https://cran.rstudio.com/'))
