@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>gentle SQL</title>
+<style>
+body{	margin-left:50px; font-family:'Arial';}
+
+p {
+    margin-top: 1em;
+     margin-bottom: 1em;
+     margin-right: 5em;
+     margin-left: 2em;
+}
+code {
+    margin-top: 1em;
+     margin-bottom: 1em;
+     margin-right: 5em;
+     margin-left: 5em;
+}
+
+</style>
+</head>
+
+<body>
+<h2>Introduction to SQL</h2>
+<h2>Purpose</h2>
+
+<p>
+This is a gentle introduction of Structured Query Language for engineers in Hydraulic Section.
+</p>
+<h2>Introduction</h2>
+<p>
+The sewer system information is stored in Oracle Spatial Database. We use the Open Spatial Munsys software, which is used on top of AutoCAD, to enter and update spatial data in a graphical environment. We use many tools that use SQL in the background. Hence, I have used examples to gently introduce the capability of SQL. 
+</p>
+
+<p>This demonstration uses SQLPLUS program. But any database program is similar because SQL is an ANSI standard. Few variations exist due to different implementations.</p>
+<input type="button" value="Image" title="Toggle images" onclick="toggle();">
+<h2>Logging in</h2>
+
+<ol>
+<li>Start Windows Powershell</li>
+<br><img src="story/window.png"/>
+<li>Did you get this?</li>
+
+<br><img src="story/powershell1.png"/>
+
+<li>sqlplus username/password@MUNSYSPDB</li>
+<br><img src="story/powershell2.png"/>
+<li>SELECT sysdate FROM DUAL;</li>
+<li>If you get date as a response, you are connected to the Oracle.</li>
+<br>
+<img src="story/powershell3.png"/>
+
+<li>Now you can try many examples.</li>
+
+</ol>
+
+<h2>Examples</h2>
+<h4>Date Check</h4>
+<p>
+<code>SELECT sysdate FROM DUAL;</code>
+</p>
+
+<h4>Pipes</h4>
+
+<code>SELECT gid, pipe_dia, geom_length FROM mboe.sp_sewgpipe;</code>
+<p>This will take long to show 75000 records on your screen.
+</p>
+
+<h4>It is better to count first.</h4>
+<p>
+<code>SELECT COUNT(*) FROM mboe.sp_sewgpipe;</code>
+</p>
+
+<h4>Let us use filter to limit to 9 records</h4>
+<p>
+<code>SELECT gid, pipe_dia, geom_length FROM mboe.sp_sewgpipe WHERE ROWNUM < 10;</code>
+</p>
+
+
+<h4>What column names (fields) are there?</h4>
+
+<p>
+<code>DESC mboe.sp_sewgpipe;</code>
+</p>
+
+<h4>The owner field ...</h4>
+<code>SELECT owner FROM mboe.sp_sewgpipe;</code>
+</p>
+<p>Ooops, 75000 records on my screen is not useful.</p>
+
+<h4>Grouping and counting</h4>
+<code>SELECT owner, COUNT(*) FROM mboe.sp_sewgpipe GROUP BY owner;</code>
+<p>Counting number of records is great. But what about length of pipe?</p>
+
+<h4>Length</h4>
+<code>SELECT owner, COUNT(*), SUM(geom_length) FROM mboe.sp_sewgpipe GROUP BY owner;</code>
+<p>What is that feet unit for? I like miles.</p>
+
+
+<h4>Miles</h4>
+<code>SELECT owner, COUNT(*), SUM(geom_length)/5280 FROM mboe.sp_sewgpipe GROUP BY owner;</code>
+<p>So many decimals!</p>
+
+
+
+<h4>Miles 0.00</h4>
+<code>SELECT owner, COUNT(*), ROUND(SUM(geom_length)/5280,2) FROM mboe.sp_sewgpipe GROUP BY owner;</code>
+<p>Only two decimals. Cleaner. But what is the ugly header for?</p>
+
+<h4>Alias</h4>
+<code>SELECT owner AGENCY, COUNT(*) N, ROUND(SUM(geom_length)/5280,2) MILES FROM mboe.sp_sewgpipe GROUP BY owner;</code>
+<br><img src="story/powershell4.png"/>
+
+<p>Alias adds clarity. Some of these pipes may have been demolished. Use filter for active pipes.</p>
+
+
+<h4>Active Pipes</h4>
+<code>SELECT owner AGENCY, COUNT(*) N, ROUND(SUM(geom_length)/5280,2) MILES FROM mboe.sp_sewgpipe WHERE pipe_status='ACT' GROUP BY owner;</code>
+<p>Only the active pipes.</p>
+
+<img src="story/powershell5.png"/>
+
+
+
+<h4>Descending Order</h4>
+<code>SELECT owner AGENCY, COUNT(*) N, ROUND(SUM(geom_length)/5280,2) MILES FROM mboe.sp_sewgpipe WHERE pipe_status='ACT' GROUP BY owner ORDER BY MILES DESC;</code>
+<p>Only the active pipes.</p>
+<img src="story/powershell6.png"/>
+
+<h4>Now manholes</h4>
+<code>SELECT MAX(rim), MIN(rim), MAX(invert), MIN(invert) FROM mboe.sp_sewnode;</code>
+<br><img src="story/powershell7.png"/>
+<p>Where are these nodes anyway? And are they correct?</p>
+
+
+<h4>Things to try</h4>
+<p><code>DESC mboe.sp_sewgpipe;</code></p>
+<p><code>SELECT DISTINCT(pipe_status) FROM mboe.sp_sewgpipe;</code></p>
+<p><code>SELECT owner, COUNT(*), SUM(geom_length)/5280 FROM mboe.sp_sewgpipe GROUP BY owner;</code></p>
+<p><code>SELECT SUM(geom_length)/5280 FROM mboe.sp_sewgpipe WHERE pipe_status='ACT' AND owner='PUC' AND int_year > 1985;</code></p>
+
+<p><code>DESC mboe.sp_sewnode;</code></p>
+<p><code>SELECT DISTINCT(node_type) FROM mboe.sp_sewnode;</code></p>
+<p><code>SELECT node_type, COUNT(*) FROM mboe.sp_sewnode WHERE node_status='ACT' GROUP BY node_type;</code></p>
+<p><code>DESC mboe.sp_hh_study;</code></p>
+<p><code>SELECT COUNT(*) FROM mboe.sp_hh_study;</code></p>
+
+
+<h4>If you are going to San Francisco ..</h4>
+
+<p><code>DESC mboe.sp_streets;</code></p>
+<p><code>SELECT COUNT(*) FROM mboe.sp_streets;</code></p>
+<p><code>SELECT name, seg_cnn FROM mboe.sp_streets WHERE ROWNUM < 11;</code></p>
+<p><code>SELECT DISTINCT(name) FROM mboe.sp_streets;</code></p>
+<p><code>SELECT DISTINCT(st_name_al) FROM mboe.sp_streets;</code></p>
+<p><code>SELECT st_name_al, ROUND(SUM(geom_length)/5280, 1) FROM mboe.sp_streets GROUP BY st_name_al;</code></p>
+
+<h4>The relational database</h4>
+<p><code>SELECT p.pipe_dia, p.geom_length, s.st_name_al, s.seg_cnn FROM mboe.sp_sewgpipe p, mboe.sp_streets s WHERE p.seg_cnn = s.seg_cnn AND ROWNUM < 11;</code></p>
+
+
+
+<h2>Conclusion</h2>
+<p>
+There is much more you can do with the SQL. Having basic understanding of the RDBM (relational database management) and SQL allows you to use database effectively. It also opens many doors. Many books on SQL are on our floor.
+</p>
+
+<h2>Updated</h2>
+<p>
+2018 B. Shrestha EHY<br>
+7/16/2018 B. Shrestha EHY<br>
+8/31/2018 B. Shrestha EHY<br>
+<a href="https://www.w3schools.com/sql/sql_intro.asp" target="_blank">w3schools tutorial</a><br>
+
+<h2>Our tables</h2>
+<pre>\\DPWNT\boe\boefiles1\Data\HYD\GIS\sfsewer_work\munsys\Schema_Docs\SFDPW_HYDRAULIC_GIS_DEFINITIONS_AND_ATTRIBUTE_DOMAINS.xlsx</pre>
+
+</p>
+
+<script
+			  src="https://code.jquery.com/jquery-3.3.1.min.js"
+			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			  crossorigin="anonymous">
+</script>
+<script>
+
+function toggle(){
+	$("img").toggle("slow");
+}
+</script>
+</body>
+</html>
