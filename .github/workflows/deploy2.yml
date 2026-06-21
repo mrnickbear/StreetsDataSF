@@ -28,6 +28,7 @@ jobs:
             any::leaflet
             any::mapview
             any::janitor
+            any::readr
                         
       - name: Authorize and Deploy Application
         env:
