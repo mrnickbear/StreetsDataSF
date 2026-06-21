@@ -23,6 +23,11 @@ jobs:
           packages: |
             any::rsconnect
             any::shiny
+            any::sf
+            any::leafem
+            any::leaflet
+            any::mapview
+            
             # Add any other packages your app explicitly relies on if not captured by renv/imports
             
       - name: Authorize and Deploy Application
