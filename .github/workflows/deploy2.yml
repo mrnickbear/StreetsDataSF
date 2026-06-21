@@ -45,7 +45,8 @@ jobs:
           RENV_CONFIG_REPOS_OVERRIDE: ""
         run: |
           Rscript -e "
-          #options(repos = c(CRAN = 'https://cran.rstudio.com/'))
+          options(repos = c(CRAN = 'https://cran.rstudio.com/'))
+          
             rsconnect::setAccountInfo(
               name = Sys.getenv('SHINYAPPS_ACCOUNT'),
               token = Sys.getenv('SHINYAPPS_TOKEN'),
@@ -55,7 +56,7 @@ jobs:
               appDir = '.',
               appName = 'StreetsDataSF',
               appMode = 'shiny',
-              repos = c(CRAN = 'https://cran.rstudio.com/'),
+              #repos = c(CRAN = 'https://cran.rstudio.com/'),
               forceUpdate = TRUE
             )
           "
