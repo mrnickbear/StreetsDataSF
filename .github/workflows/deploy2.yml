@@ -43,6 +43,7 @@ jobs:
           SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
         run: |
           Rscript -e "
+          options(repos = c(CRAN = 'https://cran.rstudio.com/'))
             rsconnect::setAccountInfo(
               name = Sys.getenv('SHINYAPPS_ACCOUNT'),
               token = Sys.getenv('SHINYAPPS_TOKEN'),
