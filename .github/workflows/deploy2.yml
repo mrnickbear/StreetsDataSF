@@ -35,6 +35,8 @@ jobs:
             any::progress
             any::rapidjsonr
             any::sfheaders
+          extra-packages: |
+            local::cran/terra@1.8-10
                         
       - name: Authorize and Deploy Application
         env:
