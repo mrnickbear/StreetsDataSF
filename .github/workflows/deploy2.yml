@@ -29,6 +29,12 @@ jobs:
             any::mapview
             any::janitor
             any::readr
+            any::cpp11
+            any::geometries
+            any::jsonify
+            any::progress
+            any::rapidjsonr
+            any::sfheaders
                         
       - name: Authorize and Deploy Application
         env:
