@@ -45,9 +45,10 @@ jobs:
           RSPM: ""
           RENV_CONFIG_REPOS_OVERRIDE: ""
         run: |
-          Rscript -e "
-          options(repos = c(CRAN = 'https://cran.rstudio.com/'))
+          # Force an completely clean, literal URL repository map into the active R session profile
+          echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'))" > .Rprofile
           
+          Rscript -e "        
             rsconnect::setAccountInfo(
               name = Sys.getenv('SHINYAPPS_ACCOUNT'),
               token = Sys.getenv('SHINYAPPS_TOKEN'),
@@ -61,3 +62,6 @@ jobs:
               forceUpdate = TRUE
             )
           "
+          
+          # Clean it up after deployment
+          rm .Rprofile
