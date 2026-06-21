@@ -27,6 +27,7 @@ jobs:
             any::leafem
             any::leaflet
             any::mapview
+            any::janitor
             
             # Add any other packages your app explicitly relies on if not captured by renv/imports
             
