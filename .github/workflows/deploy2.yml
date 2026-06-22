@@ -33,7 +33,8 @@ jobs:
             
             # Use minimal memory footprint optimization flags for compilation
             install.packages(
-              c('rsconnect', 'shiny', 'sf', 'leafem', 'leaflet', 'mapview', 'janitor'), 
+              c('rsconnect', 'shiny', 'sf', 'leafem', 'leaflet', 'mapview',
+                'janitor', 'sqldf'), 
               clean = TRUE, 
               INSTALL_opts = c('--no-docs', '--no-html', '--no-multiarch')
             )
@@ -52,6 +53,10 @@ jobs:
               token = Sys.getenv('SHINYAPPS_TOKEN'),
               secret = Sys.getenv('SHINYAPPS_SECRET')
             )
+            
+            # Regenerate manifest so that newly added packages (sqldf) are
+            # captured and installed on the shinyapps.io server during deployment
+            rsconnect::writeManifest(appDir = '.')
             
             rsconnect::deployApp(
               appDir = '.',
