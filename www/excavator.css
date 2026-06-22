@@ -1,0 +1,178 @@
+/* ============================================================
+   SF Streets SQL Curriculum — Digger the Excavator Styles
+   ============================================================ */
+
+/* ---------- Excavator animations ---------- */
+@keyframes excavator-bounce {
+  0%, 100% { transform: translateY(0px)  rotate(0deg); }
+  30%       { transform: translateY(-10px) rotate(-4deg); }
+  60%       { transform: translateY(-5px)  rotate(3deg); }
+}
+
+@keyframes excavator-excited {
+  0%, 100% { transform: translateY(0px)  scale(1);    }
+  50%       { transform: translateY(-14px) scale(1.1); }
+}
+
+.excavator-img {
+  animation: excavator-bounce 2s ease-in-out infinite;
+  cursor: pointer;
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.2));
+  flex-shrink: 0;
+}
+
+.excavator-img:hover {
+  animation: excavator-excited 0.6s ease-in-out infinite;
+}
+
+/* ---------- Overall curriculum container ---------- */
+.curriculum-container {
+  padding: 20px 25px;
+  max-width: 880px;
+}
+
+/* ---------- Excavator + narrative row ---------- */
+.excavator-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+  border: 1px solid #ffc107;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.narrative-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-counter-wrap {
+  font-size: 0.82em;
+  color: #888;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.step-title {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+/* Speech bubble pointing left toward the excavator */
+.speech-bubble {
+  position: relative;
+  background: #ffffff;
+  border: 2px solid #f0a500;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.95em;
+  line-height: 1.55;
+  color: #333;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: -17px;
+  border: 8px solid transparent;
+  border-right-color: #f0a500;
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: -12px;
+  border: 6px solid transparent;
+  border-right-color: #ffffff;
+}
+
+/* ---------- SQL input area ---------- */
+.sql-input-area {
+  margin-bottom: 15px;
+}
+
+/* Dark-themed textarea for SQL — scoped tightly to avoid !important */
+.sql-input-area .form-group textarea.form-control {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.88em;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.btn-run {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* ---------- SQL output / results area ---------- */
+.sql-output-area {
+  margin-bottom: 20px;
+}
+
+.results-table-wrap {
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.results-table-wrap table {
+  margin-bottom: 0;
+  font-size: 0.85em;
+}
+
+#sql_error {
+  color: #dc3545;
+  background: #fff5f5;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.85em;
+  margin-top: 8px;
+  white-space: pre-wrap;
+}
+
+/* ---------- Navigation bar ---------- */
+.nav-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.step-progress {
+  flex: 1;
+  text-align: center;
+}
+
+.step-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #ddd;
+  margin: 0 3px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.step-dot.active {
+  background: #f0a500;
+  transform: scale(1.4);
+}
+
+.step-dot.completed {
+  background: #28a745;
+}
