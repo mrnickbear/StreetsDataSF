@@ -95,6 +95,7 @@ streets_df <- sf::st_drop_geometry(streets)
 
 # Detect column names so curriculum queries adapt to whatever DataSF returns
 .detect_col <- function(haystack, candidates) {
+  if (length(haystack) == 0L) return(NULL)
   for (cand in candidates) {
     if (cand %in% haystack) return(cand)
   }
@@ -361,10 +362,11 @@ server <- function(input, output, session) {  #errors line numbers start from he
     }
 
     tryCatch({
+      # Enforce a row cap at the query level to avoid fetching excessive data.
+      # Append LIMIT 1000 only when the user's query doesn't already include one.
+      bounded_sql <- if (grepl("\\bLIMIT\\b", toupper(sql))) sql else paste0(sql, "\nLIMIT 1000")
       # sqldf resolves 'streets_df' from the global environment
-      res <- sqldf::sqldf(sql)
-      # Cap to 1000 rows to avoid excessive memory use
-      if (nrow(res) > 1000L) res <- res[seq_len(1000L), , drop = FALSE]
+      res <- sqldf::sqldf(bounded_sql)
       sql_results$data  <- res
       sql_results$error <- NULL
     }, error = function(e) {
