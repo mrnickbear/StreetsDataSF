@@ -5,8 +5,7 @@ library(shiny)
 # library(leafem)
 library(leaflet)
 library(mapview)
-library(DBI)
-library(RSQLite)
+library(sqldf)
 
 # streets <-  read_sf("K:\\sfbase\\arcview\\SFCity\\ACTIVESTREETS\\activestreets.shp")
 # source("R:\\Modeling Work\\oracle_sql\\Ruby\\ScorecardExport\\sfrb.datasf\\R\\datasf.R")
@@ -88,15 +87,15 @@ load.dataset.geojson <- function(dataset_id, filename.gpkg = NA) {
 streets <- load.dataset.geojson("3wks-ifmi")
 
 
-# ── SQL Curriculum: load streets into in-memory SQLite ────────────────────────
+# ── SQL Curriculum: plain data frame for sqldf ────────────────────────────────
+# sqldf resolves table names from the calling environment; streets_df is the
+# geometry-free data frame that the curriculum SQL queries reference.
 
 streets_df <- sf::st_drop_geometry(streets)
 
-sql_con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-DBI::dbWriteTable(sql_con, "streets", streets_df, overwrite = TRUE)
-
 # Detect column names so curriculum queries adapt to whatever DataSF returns
 .detect_col <- function(haystack, candidates) {
+  if (length(haystack) == 0L) return(NULL)
   for (cand in candidates) {
     if (cand %in% haystack) return(cand)
   }
@@ -115,9 +114,9 @@ sql_curriculum <- list(
     narrative = paste0(
       "Hi! I'm Digger the Excavator! \U0001f69c  Let's explore San Francisco's streets ",
       "using SQL — Structured Query Language. The streets data is loaded into a table ",
-      "called 'streets'. Run this query to take your first look!"
+      "called 'streets_df'. Run this query to take your first look!"
     ),
-    sql = "SELECT * FROM streets LIMIT 5"
+    sql = "SELECT * FROM streets_df LIMIT 5"
   ),
 
   list(
@@ -126,16 +125,17 @@ sql_curriculum <- list(
       "There are thousands of records! Before showing them all (don't — it would be ",
       "overwhelming!), let's COUNT how many there are. COUNT(*) counts every row."
     ),
-    sql = "SELECT COUNT(*) AS total_segments FROM streets"
+    sql = "SELECT COUNT(*) AS total_segments FROM streets_df"
   ),
 
   list(
     title     = "What columns do we have?",
     narrative = paste0(
-      "Each row is one street segment. This special PRAGMA query shows the table ",
-      "structure — what information (columns) we have for each segment."
+      "Each row is one street segment. This query shows one complete row so you can ",
+      "see every column available. With sqldf, the table name matches the R data ",
+      "frame name — 'streets_df' — making it easy to jump between SQL and R!"
     ),
-    sql = "SELECT name AS column_name, type AS data_type\nFROM pragma_table_info('streets')"
+    sql = "SELECT * FROM streets_df LIMIT 1"
   ),
 
   list(
@@ -145,7 +145,7 @@ sql_curriculum <- list(
       "How many unique streets are in this arterial streets dataset?"
     ),
     sql = sprintf(
-      "SELECT COUNT(DISTINCT %s) AS unique_streets\nFROM streets",
+      "SELECT COUNT(DISTINCT %s) AS unique_streets\nFROM streets_df",
       .name_col
     )
   ),
@@ -160,7 +160,7 @@ sql_curriculum <- list(
       paste0(
         "SELECT %s,\n",
         "  ROUND(SUM(%s) / 5280.0, 2) AS total_miles\n",
-        "FROM streets\n",
+        "FROM streets_df\n",
         "GROUP BY %s\n",
         "ORDER BY total_miles DESC\n",
         "LIMIT 10"
@@ -179,7 +179,7 @@ sql_curriculum <- list(
       paste0(
         "SELECT %s,\n",
         "  LENGTH(%s) AS name_length\n",
-        "FROM streets\n",
+        "FROM streets_df\n",
         "ORDER BY name_length DESC\n",
         "LIMIT 10"
       ),
@@ -198,7 +198,7 @@ sql_curriculum <- list(
       paste0(
         "SELECT %s,\n",
         "  ROUND(%s, 0) AS length_ft\n",
-        "FROM streets\n",
+        "FROM streets_df\n",
         "ORDER BY %s DESC\n",
         "LIMIT 10"
       ),
@@ -218,7 +218,7 @@ sql_curriculum <- list(
         "SELECT %s,\n",
         "  COUNT(*) AS num_segments,\n",
         "  ROUND(SUM(%s) / 5280.0, 2) AS total_miles\n",
-        "FROM streets\n",
+        "FROM streets_df\n",
         "GROUP BY %s\n",
         "HAVING num_segments > 20\n",
         "ORDER BY total_miles DESC\n",
@@ -240,7 +240,7 @@ sql_curriculum <- list(
         "SELECT %s,\n",
         "  COUNT(*) AS segments,\n",
         "  ROUND(SUM(%s) / 5280.0, 2) AS miles\n",
-        "FROM streets\n",
+        "FROM streets_df\n",
         "WHERE UPPER(%s) LIKE '%%MISSION%%'\n",
         "GROUP BY %s"
       ),
@@ -260,7 +260,7 @@ sql_curriculum <- list(
         "SELECT %s,\n",
         "  COUNT(*) AS segments,\n",
         "  ROUND(SUM(%s) / 5280.0, 2) AS miles\n",
-        "FROM streets\n",
+        "FROM streets_df\n",
         "GROUP BY %s\n",
         "ORDER BY miles DESC\n",
         "LIMIT 20"
@@ -274,7 +274,7 @@ sql_curriculum <- list(
 
 
 server <- function(input, output, session) {  #errors line numbers start from here
-  
+
   # ── Map tab ───────────────────────────────────────────────────────────────
   url <- a("DataSF Arterial Streets View",
            href = "https://data.sfgov.org/-/Arterial-Streets-of-San-Francisco/3wks-ifmi/about_data")
@@ -348,9 +348,9 @@ server <- function(input, output, session) {  #errors line numbers start from he
     if (nchar(sql) == 0L) return()
 
     # Only allow read-only statement types
-    if (!grepl("^(SELECT|WITH|PRAGMA)\\b", toupper(sql))) {
+    if (!grepl("^(SELECT|WITH)\\b", toupper(sql))) {
       sql_results$data  <- NULL
-      sql_results$error <- "Only SELECT / PRAGMA / WITH queries are allowed in this curriculum."
+      sql_results$error <- "Only SELECT / WITH queries are allowed in this curriculum."
       return()
     }
 
@@ -362,8 +362,11 @@ server <- function(input, output, session) {  #errors line numbers start from he
     }
 
     tryCatch({
-      # Fetch at most 1000 rows to avoid excessive memory use
-      res               <- DBI::dbGetQuery(sql_con, sql, n = 1000L)
+      # Enforce a row cap at the query level to avoid fetching excessive data.
+      # Append LIMIT 1000 only when the user's query doesn't already include one.
+      bounded_sql <- if (grepl("\\bLIMIT\\b", toupper(sql))) sql else paste0(sql, "\nLIMIT 1000")
+      # sqldf resolves 'streets_df' from the global environment
+      res <- sqldf::sqldf(bounded_sql)
       sql_results$data  <- res
       sql_results$error <- NULL
     }, error = function(e) {
@@ -377,7 +380,7 @@ server <- function(input, output, session) {  #errors line numbers start from he
     if (is.null(sql_results$data)) return(NULL)
     df <- sql_results$data
     if (nrow(df) == 0L) return(data.frame(Result = "(query returned no rows)"))
-    df   # already capped at 1000 rows by dbGetQuery(n = 1000L)
+    df
   })
 
   # Render error message

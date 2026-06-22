@@ -34,7 +34,7 @@ jobs:
             # Use minimal memory footprint optimization flags for compilation
             install.packages(
               c('rsconnect', 'shiny', 'sf', 'leafem', 'leaflet', 'mapview',
-                'janitor', 'DBI', 'RSQLite'), 
+                'janitor', 'sqldf'), 
               clean = TRUE, 
               INSTALL_opts = c('--no-docs', '--no-html', '--no-multiarch')
             )
@@ -54,7 +54,7 @@ jobs:
               secret = Sys.getenv('SHINYAPPS_SECRET')
             )
             
-            # Regenerate manifest so that newly added packages (DBI, RSQLite) are
+            # Regenerate manifest so that newly added packages (sqldf) are
             # captured and installed on the shinyapps.io server during deployment
             rsconnect::writeManifest(appDir = '.')
             

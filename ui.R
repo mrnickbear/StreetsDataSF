@@ -50,7 +50,7 @@ ui <- fluidPage(
           textAreaInput(
             inputId     = "sql_input",
             label       = "SQL Query \u2014 modify and run:",
-            value       = "SELECT * FROM streets LIMIT 5",
+            value       = "SELECT * FROM streets_df LIMIT 5",
             rows        = 5,
             width       = "100%"
           ),
