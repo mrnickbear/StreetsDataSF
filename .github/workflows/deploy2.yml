@@ -29,35 +29,36 @@ jobs:
           SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
         run: |
           Rscript -e "
-            options(repos = c(CRAN = 'https://cran.rstudio.com/'))
-            
+            # Use full URL (no 'CRAN' alias) so rsconnect::writeManifest()
+            # records the complete repository URL in the manifest rather than
+            # the bare alias string 'CRAN', which Posit Connect cannot resolve.
+            options(repos = c('https://packagemanager.posit.co/cran/latest'))
+
             # Use minimal memory footprint optimization flags for compilation
             install.packages(
               c('rsconnect', 'shiny', 'sf', 'leafem', 'leaflet', 'mapview',
-                'janitor', 'sqldf'), 
-              clean = TRUE, 
-              INSTALL_opts = c('--no-docs', '--no-html', '--no-multiarch')
-            )
-            
-            # Pin terra with the same optimization flags
-            install.packages(
-              'https://cran.r-project.org/src/contrib/Archive/terra/terra_1.8-10.tar.gz', 
-              repos = NULL, 
-              type = 'source',
+                'janitor', 'sqldf'),
               clean = TRUE,
               INSTALL_opts = c('--no-docs', '--no-html', '--no-multiarch')
             )
-            
+
+            # Install terra (latest available) with the same optimization flags
+            install.packages(
+              'terra',
+              clean = TRUE,
+              INSTALL_opts = c('--no-docs', '--no-html', '--no-multiarch')
+            )
+
             rsconnect::setAccountInfo(
               name = Sys.getenv('SHINYAPPS_ACCOUNT'),
               token = Sys.getenv('SHINYAPPS_TOKEN'),
               secret = Sys.getenv('SHINYAPPS_SECRET')
             )
-            
-            # Regenerate manifest so that newly added packages (sqldf) are
-            # captured and installed on the shinyapps.io server during deployment
+
+            # Regenerate manifest so all packages (including sqldf) are captured
+            # with full repository URLs before deployment.
             rsconnect::writeManifest(appDir = '.')
-            
+
             rsconnect::deployApp(
               appDir = '.',
               appName = 'StreetsDataSF',
