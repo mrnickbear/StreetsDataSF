@@ -224,7 +224,7 @@ sql_curriculum <- list(
     narrative = paste0(
       "Watch out! Divided roads (boulevards with a raised median) have TWO centerlines ",
       "\u2014 one per direction. Their total length is counted TWICE! Some engineers call ",
-      "these 'sausages'. Streets with unusually many segments may be divided roads."
+      "these 'sausages'. Try to find some on the map."
     ),
     sql = sprintf(
       paste0(
@@ -246,7 +246,7 @@ sql_curriculum <- list(
     narrative = paste0(
       "This dataset covers only ARTERIAL streets. Mission Street should appear \u2014 ",
       "but the block BETWEEN 20TH and 21ST STREET is MISSING from this dataset! ",
-      "Query Mission Street and see what you can discover."
+      "Look at the map again and try to find it."
     ),
     sql = sprintf(
       paste0(
