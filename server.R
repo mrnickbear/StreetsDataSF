@@ -92,7 +92,13 @@ streets <- load.dataset.geojson("3wks-ifmi")
 # geometry-free data frame that the curriculum SQL queries reference.
 
 streets_df <- sf::st_drop_geometry(streets)
-streets_df$length <- as.numeric(sf::st_length(sf::st_transform(streets, 2227)))
+# EPSG:2227 (NAD83 / California zone 3) uses US survey feet, matching curriculum queries.
+.length_ft <- tryCatch(
+  as.numeric(sf::st_length(sf::st_transform(streets, 2227))),
+  error = function(e) stop("Failed to compute street segment lengths from geometry: ", e$message, call. = FALSE)
+)
+if (anyNA(.length_ft)) stop("Computed street segment lengths contain NA values.", call. = FALSE)
+streets_df$length <- .length_ft
 
 # Detect column names so curriculum queries adapt to whatever DataSF returns
 .detect_col <- function(haystack, candidates) {
