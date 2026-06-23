@@ -92,6 +92,16 @@ streets <- load.dataset.geojson("3wks-ifmi")
 # geometry-free data frame that the curriculum SQL queries reference.
 
 streets_df <- sf::st_drop_geometry(streets)
+# EPSG:2227 (NAD83 / California zone 3) uses US survey feet, matching curriculum queries.
+street_segment_count <- nrow(streets)
+segment_lengths_ft <- tryCatch(
+  as.numeric(sf::st_length(sf::st_transform(streets, 2227))),
+  error = function(e) stop("Failed to compute street segment lengths for ", street_segment_count, " rows: ", e$message, call. = FALSE)
+)
+if (anyNA(segment_lengths_ft)) {
+  stop("Computed street segment lengths contain ", sum(is.na(segment_lengths_ft)), " NA values out of ", street_segment_count, " rows.", call. = FALSE)
+}
+streets_df$length <- segment_lengths_ft
 
 # Detect column names so curriculum queries adapt to whatever DataSF returns
 .detect_col <- function(haystack, candidates) {
@@ -104,7 +114,7 @@ streets_df <- sf::st_drop_geometry(streets)
 
 .col <- tolower(names(streets_df))
 .name_col   <- .detect_col(.col, c("streetname", "street_name", "fullstreetname", "name"))
-.length_col <- .detect_col(.col, c("shape_leng", "shape__len", "shape_len", "length"))
+.length_col <- "length"
 
 # Build curriculum: 10 step-by-step SQL lessons about SF streets
 sql_curriculum <- list(
@@ -389,4 +399,3 @@ server <- function(input, output, session) {  #errors line numbers start from he
   })
 
 } #End of server
-
