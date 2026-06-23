@@ -92,6 +92,7 @@ streets <- load.dataset.geojson("3wks-ifmi")
 # geometry-free data frame that the curriculum SQL queries reference.
 
 streets_df <- sf::st_drop_geometry(streets)
+streets_df$length <- as.numeric(sf::st_length(sf::st_transform(streets, 2227)))
 
 # Detect column names so curriculum queries adapt to whatever DataSF returns
 .detect_col <- function(haystack, candidates) {
@@ -104,7 +105,7 @@ streets_df <- sf::st_drop_geometry(streets)
 
 .col <- tolower(names(streets_df))
 .name_col   <- .detect_col(.col, c("streetname", "street_name", "fullstreetname", "name"))
-.length_col <- .detect_col(.col, c("shape_leng", "shape__len", "shape_len", "length"))
+.length_col <- "length"
 
 # Build curriculum: 10 step-by-step SQL lessons about SF streets
 sql_curriculum <- list(
@@ -389,4 +390,3 @@ server <- function(input, output, session) {  #errors line numbers start from he
   })
 
 } #End of server
-
