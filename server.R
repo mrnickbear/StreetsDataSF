@@ -183,8 +183,8 @@ sql_curriculum <- list(
     title     = "Longest street name \U0001f4cf",
     narrative = paste0(
       "Which street has the LONGEST NAME? The LENGTH() function counts the characters ",
-      "in a text value. We'll also sum each street's total miles to compare the longest ",
-      "names with how much roadway they cover."
+      "in a text value. We'll list each street name once, then sum each street's total ",
+      "miles to compare the longest names with how much roadway they cover."
     ),
     sql = sprintf(
       paste0(
@@ -194,7 +194,7 @@ sql_curriculum <- list(
         ")\n",
         "SELECT dn.%1$s,\n",
         "  LENGTH(dn.%1$s) AS name_length,\n",
-        "  ROUND(SUM(COALESCE(sd.%2$s, 0)) / 5280.0, 2) AS total_miles\n",
+        "  ROUND(SUM(sd.%2$s) / 5280.0, 2) AS total_miles\n",
         "FROM distinct_names dn\n",
         "LEFT JOIN streets_df sd ON sd.%1$s = dn.%1$s\n",
         "GROUP BY dn.%1$s\n",
