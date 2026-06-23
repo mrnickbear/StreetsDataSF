@@ -188,18 +188,20 @@ sql_curriculum <- list(
     ),
     sql = sprintf(
       paste0(
-        "SELECT DISTINCT s1.%s,\n",
-        "  LENGTH(s1.%s) AS name_length,\n",
-        "  ROUND((\n",
-        "    SELECT SUM(COALESCE(s2.%s, 0)) / 5280.0\n",
-        "    FROM streets_df s2\n",
-        "    WHERE s2.%s = s1.%s\n",
-        "  ), 2) AS total_miles\n",
-        "FROM streets_df s1\n",
+        "WITH distinct_names AS (\n",
+        "  SELECT DISTINCT %s\n",
+        "  FROM streets_df\n",
+        ")\n",
+        "SELECT dn.%s,\n",
+        "  LENGTH(dn.%s) AS name_length,\n",
+        "  ROUND(SUM(COALESCE(sd.%s, 0)) / 5280.0, 2) AS total_miles\n",
+        "FROM distinct_names dn\n",
+        "LEFT JOIN streets_df sd ON sd.%s = dn.%s\n",
+        "GROUP BY dn.%s\n",
         "ORDER BY name_length DESC, total_miles DESC\n",
         "LIMIT 10"
       ),
-      .name_col, .name_col, .length_col, .name_col, .name_col
+      .name_col, .name_col, .name_col, .length_col, .name_col, .name_col, .name_col
     )
   ),
 
