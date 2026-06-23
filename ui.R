@@ -12,7 +12,8 @@ ui <- fluidPage(
         // and logs "Unrecognized feature" warnings for deprecated feature names (vr,
         // ambient-light-sensor) that some Chrome versions still enumerate.
         // This is a platform-level issue in Posit Connect; the workaround patches
-        // the Feature Policy API and console.warn so the warnings do not surface.
+        // the Feature Policy API and all relevant console methods so the warnings
+        // do not surface regardless of which console channel the SDK version uses.
         // Remove this block once Posit Connect updates their LaunchDarkly SDK.
         //
         // These Feature Policy names were deprecated/removed from the W3C Permissions
@@ -32,23 +33,31 @@ ui <- fluidPage(
           };
         }
 
-        // Belt-and-suspenders: suppress console.warn messages that contain
-        // "Unrecognized feature" together with one of the known deprecated names.
-        // Using substring matching so the filter survives minor SDK message changes.
-        var _origWarn = console.warn;
-        console.warn = function() {
-          var msg = arguments.length > 0 ? String(arguments[0]) : "";
-          if (msg.indexOf("Unrecognized feature") !== -1) {
-            for (var i = 0; i < _deprecated.length; i++) {
-              if (msg.indexOf(_deprecated[i]) !== -1) {
-                // Intentionally suppress: this is a known platform warning, not
-                // an application error.  See the WORKAROUND comment above.
-                return;
-              }
-            }
+        // Helper: returns true if any argument contains "Unrecognized feature"
+        // together with one of the known deprecated feature names.
+        function _isDeprecatedFeatureMsg(args) {
+          var msg = args.length > 0 ? String(args[0]) : "";
+          if (msg.indexOf("Unrecognized feature") === -1) return false;
+          for (var i = 0; i < _deprecated.length; i++) {
+            if (msg.indexOf(_deprecated[i]) !== -1) return true;
           }
-          return _origWarn.apply(console, arguments);
-        };
+          return false;
+        }
+
+        // Patch console.warn, console.error, and console.log so the filter
+        // applies regardless of which channel the LaunchDarkly SDK version uses.
+        // Using substring matching so the filter survives minor SDK message changes.
+        ["warn", "error", "log"].forEach(function(method) {
+          var _orig = console[method];
+          console[method] = function() {
+            if (_isDeprecatedFeatureMsg(arguments)) {
+              // Intentionally suppress: this is a known platform warning, not
+              // an application error.  See the WORKAROUND comment above.
+              return;
+            }
+            return _orig.apply(console, arguments);
+          };
+        });
       })();
     '))
   ),
