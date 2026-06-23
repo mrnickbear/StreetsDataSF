@@ -142,8 +142,8 @@ sql_curriculum <- list(
     title     = "What columns do we have?",
     narrative = paste0(
       "Each row is one street segment. This query shows one complete row so you can ",
-      "see every column available. With sqldf, the table name matches the R data ",
-      "frame name — 'streets_df' — making it easy to jump between SQL and R!"
+      "see every column available. The table name 'streets_df' matches the R data ",
+      "frame name — making it easy to jump between SQL and R!"
     ),
     sql = "SELECT * FROM streets_df LIMIT 1"
   ),

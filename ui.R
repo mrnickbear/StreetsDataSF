@@ -78,7 +78,7 @@ ui <- fluidPage(
 
     # ── SQL Curriculum tab ──────────────────────────────────────────────────
     tabPanel(
-      "\U0001f4da SQL Curriculum",
+      "Gentle SQL",
       div(
         class = "curriculum-container",
 
@@ -106,7 +106,7 @@ ui <- fluidPage(
             inputId     = "sql_input",
             label       = "SQL Query \u2014 modify and run:",
             value       = "SELECT * FROM streets_df LIMIT 5",
-            rows        = 5,
+            rows        = 10,
             width       = "100%"
           ),
           actionButton("run_sql", "\u25b6 Run Query",
@@ -127,6 +127,12 @@ ui <- fluidPage(
           actionButton("prev_step", "\u25c4 Previous", class = "btn btn-default"),
           uiOutput("step_progress"),
           actionButton("next_step", "Next \u25ba",     class = "btn btn-primary")
+        ),
+
+        # Attribution
+        div(
+          class = "curriculum-attribution",
+          "B. Shrestha EHY, 2018"
         )
       )
     )

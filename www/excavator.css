@@ -15,14 +15,13 @@
 }
 
 .excavator-img {
-  animation: excavator-bounce 2s ease-in-out infinite;
   cursor: pointer;
   filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.2));
   flex-shrink: 0;
 }
 
 .excavator-img:hover {
-  animation: excavator-excited 0.6s ease-in-out infinite;
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.2));
 }
 
 /* ---------- Overall curriculum container ---------- */
@@ -41,6 +40,7 @@
   border-radius: 14px;
   padding: 18px 20px;
   margin-bottom: 20px;
+  min-height: 180px;
 }
 
 .narrative-wrap {
@@ -142,6 +142,13 @@
   font-size: 0.85em;
   margin-top: 8px;
   white-space: pre-wrap;
+}
+
+/* ---------- Attribution ---------- */
+.curriculum-attribution {
+  margin-top: 14px;
+  font-size: 0.8em;
+  color: #888;
 }
 
 /* ---------- Navigation bar ---------- */
